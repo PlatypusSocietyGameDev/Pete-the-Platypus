@@ -2,7 +2,7 @@ import pygame
 
 pygame.init()
 pygame.display.set_caption('Pete the Platypus')
-WindowIcon = pygame.image.load("assets\icon.png")
+WindowIcon = pygame.image.load(r"assets/images/icon.png")
 screenWidth, screenHeight = (1920, 1080)
 background_colour = (135, 206, 235)
 
