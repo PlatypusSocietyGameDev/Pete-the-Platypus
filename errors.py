@@ -9,3 +9,7 @@ class VectorError(Exception):
 
 class UDim2Error(Exception):
     pass
+
+
+class UDimError(Exception):
+    pass

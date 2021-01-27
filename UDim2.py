@@ -1,22 +1,29 @@
 from errors import UDim2Error
 from dataclasses import dataclass
-import Udim
+import UDim
 
 
 @dataclass()
 class New:
-    def __init__(self, scaleX, offsetX, scaleY, offsetY):
-        if not isinstance(scaleX, (int, float)):
-            raise UDim2Error("scaleX Has To Be Of Class int/float")
-        if not isinstance(offsetX, (int, float)):
-            raise UDim2Error("offsetX Has To Be Of Class int/float")
-        if not isinstance(scaleY, (int, float)):
+    def __init__(self, scaleX, offsetX, scaleY=None, offsetY=None):
+        if not isinstance(scaleX, (int, float, UDim.New)):
+            raise UDim2Error("scaleX Has To Be Of Class int/float/UDim.New")
+        if not isinstance(offsetX, (int, float, UDim.New)):
+            raise UDim2Error("offsetX Has To Be Of Class int/float/UDim.New")
+        if scaleY and not isinstance(scaleY, (int, float)):
             raise UDim2Error("scaleY Has To Be Of Class int/float")
-        if not isinstance(offsetY, (int, float)):
+        if offsetY and not isinstance(offsetY, (int, float)):
             raise UDim2Error("offsetY Has To Be Of Class int/float")
 
-        self._X = Udim.New(scaleX, offsetX)
-        self._Y = Udim.New(scaleY, offsetY)
+        if scaleY and offsetY:
+            self._X = UDim.New(scaleX, offsetX)
+            self._Y = UDim.New(scaleY, offsetY)
+        else:
+            self._X = scaleX
+            self._Y = offsetX
+
+    def __repr__(self):
+        return f"UDim2 XScale: {self._X._Scale}, XOffset: {self._X._Offset}, YScale: {self._Y._Scale}, YOffset: {self._Y._Offset}"
 
     @property
     def X(self):
@@ -33,3 +40,15 @@ class New:
     @Y.setter
     def Y(self, newVal):
         raise UDim2Error("Y Cannot Be Reassigned")
+
+    def __add__(self, other):
+        if isinstance(other, New):
+            return New(self._X + other._X, self._Y + other._Y)
+        else:
+            raise UDim2Error(f"{type(other)} Not Supported For Addition")
+
+    def __sub__(self, other):
+        if isinstance(other, New):
+            return New(self._X - other._X, self._Y - other._Y)
+        else:
+            raise UDim2Error(f"{type(other)} Not Supported For Subtraction")

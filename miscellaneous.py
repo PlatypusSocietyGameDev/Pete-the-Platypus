@@ -1,10 +1,19 @@
 import Vector2
 from pygame import surface
 import ctypes
+import Enums
+import UDim2
+
 
 user32 = ctypes.windll.user32
-screenWidth, screenHeight = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1) - 60
+screenWidth, screenHeight = (1920, 1020)
 
 
-def reposition(imageSurface: surface, anchorType) -> Vector2.New:
+def setScreenData(width, height):
+    global screenWidth, screenHeight
+
+    screenWidth, screenHeight = width, height
+
+
+def getTopLeft(imageSurface: surface, anchorType: Enums.AnchorType, anchorUDim2: UDim2) -> Vector2.New:
     pass
