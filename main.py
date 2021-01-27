@@ -1,18 +1,16 @@
 import pygame
-import ctypes
+import constants
 
 
 pygame.init()
 pygame.display.set_caption('Pete the Platypus')
-WindowIcon = pygame.image.load(r"assets/images/icon.png")
+WindowIcon = pygame.image.load(r"assets/images/Petebetter1.png")
 
-user32 = ctypes.windll.user32
-screenWidth, screenHeight = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1) - 60
 
 background_colour = (135, 206, 235)
 
 pygame.display.set_icon(WindowIcon)
-windowScreen = pygame.display.set_mode((screenWidth, screenHeight))
+windowScreen = pygame.display.set_mode((constants.SCREENWIDTH, constants.SCREENHEIGHT))
 windowScreen.fill(background_colour)
 
 pygame.display.flip()
