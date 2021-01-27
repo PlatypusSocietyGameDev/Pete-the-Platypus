@@ -4,7 +4,7 @@ import ctypes
 
 pygame.init()
 pygame.display.set_caption('Pete the Platypus')
-WindowIcon = pygame.image.load(r"assets/images/icon.ico")
+WindowIcon = pygame.image.load(r"assets/images/icon.png")
 
 user32 = ctypes.windll.user32
 screenWidth, screenHeight = user32.GetSystemMetrics(0), user32.GetSystemMetrics(1) - 60
