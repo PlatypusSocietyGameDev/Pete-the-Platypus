@@ -5,7 +5,6 @@ import UDim2
 import constants
 
 screenWidth, screenHeight = constants.SCREENWIDTH, constants.SCREENHEIGHT
-flipVector = Vector2.New(0, screenHeight)
 
 anchorOffsetFunctions = {
     Enums.AnchorType.BottomLeft: lambda width, height: (0, height),
@@ -22,9 +21,9 @@ anchorOffsetFunctions = {
 }
 
 
-def absoluteUDim2(UDim2Pos: UDim2.New) -> Vector2.New:
-    return Vector2.New(screenWidth * UDim2Pos.X.Scale + UDim2Pos.X.Offset,
-                       screenHeight * UDim2Pos.Y.Scale + UDim2Pos.Y.Offset
+def absoluteUDim2(UDim2Pos: UDim2.New, func=int) -> Vector2.New:
+    return Vector2.New(func(screenWidth * UDim2Pos.X.Scale + UDim2Pos.X.Offset),
+                       func(screenHeight * UDim2Pos.Y.Scale + UDim2Pos.Y.Offset)
                        )
 
 
@@ -36,6 +35,6 @@ def getTopLeft(imageSurface: surface, anchorType: Enums.AnchorType, anchorUDim2P
     newPosition = absolutePosition + anchorOffset
 
     if toPygame:
-        newPosition = flipVector - newPosition
+        newPosition = Vector2.New(newPosition.X, screenHeight - newPosition.Y)
 
     return newPosition

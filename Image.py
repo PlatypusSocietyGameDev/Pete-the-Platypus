@@ -13,12 +13,19 @@ class New:
         self.imagePath = imagePath
         self.imageSurface = image.load(self.imagePath)
 
+        absoluteSize = absoluteUDim2(UDim2Scale)
         self.imageSurface = transform.scale(self.imageSurface,
-                                            absoluteUDim2(UDim2Scale).tuple
+                                            absoluteSize.tuple
                                             )
 
         self.imageUDim2Pos = UDim2Pos
         self.anchorType = anchorType
+
+    def changeSize(self, UDim2Scale: UDim2.New):
+        absoluteSize = absoluteUDim2(UDim2Scale)
+        self.imageSurface = transform.scale(self.imageSurface,
+                                            absoluteSize.tuple
+                                            )
 
     def draw(self):
         newPosition = getTopLeft(self.imageSurface, self.anchorType, self.imageUDim2Pos, toPygame=True)

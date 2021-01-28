@@ -25,7 +25,7 @@ Background = Image.New(
     r"assets/images/background.jpg",
 
     UDim2.New(0, 0, 0, 0),
-    UDim2.New(0.5, 0, 1, 0),
+    UDim2.New(1, 0, 1, 0),
     Enums.AnchorType.BottomLeft
 )
 
