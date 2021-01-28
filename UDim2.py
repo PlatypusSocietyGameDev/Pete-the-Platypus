@@ -15,7 +15,7 @@ class New:
         if offsetY and not isinstance(offsetY, (int, float)):
             raise UDim2Error("offsetY Has To Be Of Class int/float")
 
-        if scaleY and offsetY:
+        if scaleY is not None and offsetY is not None:
             self._X = UDim.New(scaleX, offsetX)
             self._Y = UDim.New(scaleY, offsetY)
         else:

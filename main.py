@@ -1,5 +1,8 @@
 import pygame
 import constants
+import Image
+import UDim2
+import Enums
 
 
 pygame.init()
@@ -16,6 +19,16 @@ windowScreen.fill(background_colour)
 pygame.display.flip()
 
 running = True
+
+Background = Image.New(
+    windowScreen,
+    r"assets/images/background.jpg",
+
+    UDim2.New(0, 0, 0, 0),
+    UDim2.New(0.5, 0, 1, 0),
+    Enums.AnchorType.BottomLeft
+)
+
 while running:
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
@@ -23,5 +36,7 @@ while running:
             running = False
 
     windowScreen.fill(background_colour)
+
+    Background.draw()
 
     pygame.display.flip()
