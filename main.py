@@ -3,6 +3,9 @@ import constants
 import Image
 import UDim2
 import Enums
+import Player
+import Vector2
+from miscellaneous import drawtext
 
 
 pygame.init()
@@ -29,7 +32,14 @@ Background = Image.New(
     Enums.AnchorType.BottomLeft
 )
 
+player = Player.New(windowScreen, Vector2.New(500, 100))
+
+clock = pygame.time.Clock()
+
 while running:
+    dt = clock.tick(60)
+    gameFPS = round(1000 / dt, 2)
+
     keys = pygame.key.get_pressed()
     for event in pygame.event.get():
         if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
@@ -38,5 +48,17 @@ while running:
     windowScreen.fill(background_colour)
 
     Background.draw()
+    player.refresh()
+    player.draw()
+
+    player.move(dt, {
+        "W": keys[pygame.K_w],
+        "A": keys[pygame.K_a],
+        "S": keys[pygame.K_s],
+        "D": keys[pygame.K_d],
+    })
+    
+    drawtext(windowScreen, (0, 0, 0), (10, 10), f"Current FPS {gameFPS}")
+    drawtext(windowScreen, (0, 0, 0), (10, 40), f"Target FPS {60}")
 
     pygame.display.flip()

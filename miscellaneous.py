@@ -1,8 +1,8 @@
 import Vector2
 from pygame import surface
 import Enums
-import UDim2
 import constants
+from pygame.font import Font
 
 screenWidth, screenHeight = constants.SCREENWIDTH, constants.SCREENHEIGHT
 
@@ -21,13 +21,13 @@ anchorOffsetFunctions = {
 }
 
 
-def absoluteUDim2(UDim2Pos: UDim2.New, func=int) -> Vector2.New:
+def absoluteUDim2(UDim2Pos, func=int) -> Vector2.New:
     return Vector2.New(func(screenWidth * UDim2Pos.X.Scale + UDim2Pos.X.Offset),
                        func(screenHeight * UDim2Pos.Y.Scale + UDim2Pos.Y.Offset)
                        )
 
 
-def getTopLeft(imageSurface: surface, anchorType: Enums.AnchorType, anchorUDim2Pos: UDim2.New, toPygame: bool = False) -> Vector2.New:
+def getTopLeft(imageSurface: surface, anchorType: Enums.AnchorType, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
     width, height = imageSurface.get_size()
 
     anchorOffset = Vector2.New(*anchorOffsetFunctions[anchorType](width, height))
@@ -38,3 +38,15 @@ def getTopLeft(imageSurface: surface, anchorType: Enums.AnchorType, anchorUDim2P
         newPosition = Vector2.New(newPosition.X, screenHeight - newPosition.Y)
 
     return newPosition
+
+
+def drawtext(window, colour, pos, text="", font=20, fontlocation=""):
+    if fontlocation == "":
+        textSettings = Font('freesansbold.ttf', font)
+    else:
+        textSettings = Font(fontlocation, font)
+
+    Text = textSettings.render(text, True, colour)
+    TextRect = Text.get_rect()
+    TextRect.x, TextRect.y = pos
+    window.blit(Text, TextRect)

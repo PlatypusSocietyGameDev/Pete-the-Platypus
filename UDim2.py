@@ -1,6 +1,7 @@
 from errors import UDim2Error
 from dataclasses import dataclass
 import UDim
+from miscellaneous import absoluteUDim2
 
 
 @dataclass()
@@ -24,6 +25,10 @@ class New:
 
     def __repr__(self):
         return f"UDim2 XScale: {self._X._Scale}, XOffset: {self._X._Offset}, YScale: {self._Y._Scale}, YOffset: {self._Y._Offset}"
+
+    @property
+    def AbsoluteSize(self):
+        return absoluteUDim2(self)
 
     @property
     def X(self):

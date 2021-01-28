@@ -1,9 +1,9 @@
 import pygame.image as image
 import pygame.transform as transform
-import UDim2
 from miscellaneous import *
 from pygame import surface
 import Enums
+import UDim2
 
 
 class New:
