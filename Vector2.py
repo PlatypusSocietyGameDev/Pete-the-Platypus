@@ -89,3 +89,9 @@ class New:
 
     def __repr__(self):
         return f"Vector2 X:{self.X} Y:{self.Y}"
+
+    def __key(self):
+        return self.tuple
+
+    def __hash__(self):
+        return hash(self.__key())

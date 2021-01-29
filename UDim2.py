@@ -1,7 +1,12 @@
 from errors import UDim2Error
 from dataclasses import dataclass
 import UDim
-from miscellaneous import absoluteUDim2
+import constants
+import Vector2
+from pygame import Surface
+
+
+screenWidth, screenHeight = constants.SCREENWIDTH, constants.SCREENHEIGHT
 
 
 @dataclass()
@@ -57,3 +62,36 @@ class New:
             return New(self._X - other._X, self._Y - other._Y)
         else:
             raise UDim2Error(f"{type(other)} Not Supported For Subtraction")
+
+
+def absoluteUDim2(UDim2Pos, func=int) -> Vector2.New:
+    return Vector2.New(func(screenWidth * UDim2Pos.X.Scale + UDim2Pos.X.Offset),
+                       func(screenHeight * UDim2Pos.Y.Scale + UDim2Pos.Y.Offset)
+                       )
+
+
+def getTopLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
+    width, height = imageSurface.get_size()
+
+    adjustedAnchorVector = Vector2.New(0, 1) - anchorVector
+    anchorOffset = adjustedAnchorVector * Vector2.New(width, height)
+    absolutePosition = absoluteUDim2(anchorUDim2Pos)
+    newPosition = absolutePosition + anchorOffset
+
+    if toPygame:
+        newPosition = Vector2.New(newPosition.X, screenHeight - newPosition.Y)
+
+    return newPosition
+
+
+def getBottomLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
+    width, height = imageSurface.get_size()
+
+    anchorOffset = anchorVector * Vector2.New(width, height)
+    absolutePosition = absoluteUDim2(anchorUDim2Pos)
+    newPosition = absolutePosition - anchorOffset
+
+    if toPygame:
+        newPosition = Vector2.New(newPosition.X, screenHeight - newPosition.Y)
+
+    return newPosition

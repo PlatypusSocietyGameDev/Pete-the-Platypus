@@ -15,7 +15,7 @@ class New:
             r"assets/images/Petebetter1.png",
             UDim2.New(0, self.Position.X, 0, self.Position.Y),
             UDim2.New(0, 100, 0, 100),
-            Enums.AnchorType.MiddleMiddle
+            Vector2.New(0.5, 0.5)
         )
 
     def refresh(self):
