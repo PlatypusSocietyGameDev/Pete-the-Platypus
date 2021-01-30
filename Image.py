@@ -1,5 +1,6 @@
 import pygame.image as image
 import pygame.transform as transform
+import pygame.mask as mask
 from pygame import Surface
 import UDim2
 import Vector2
@@ -13,6 +14,7 @@ class New:
         self.imageSurface = image.load(self.imagePath)
 
         absoluteSize = UDim2.absoluteUDim2(UDim2Scale)
+
         self.imageSurface = transform.scale(self.imageSurface,
                                             absoluteSize.tuple
                                             )
@@ -20,12 +22,21 @@ class New:
         self.imageUDim2Pos = UDim2Pos
         self.anchorVector = anchorVector
 
+        topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.imageRect = self.imageSurface.get_rect(topleft=topLeft.tuple)
+        self.imageMask = mask.from_surface(self.imageSurface)
+
     def changeSize(self, UDim2Scale: UDim2.New):
         absoluteSize = UDim2.absoluteUDim2(UDim2Scale)
         self.imageSurface = transform.scale(self.imageSurface,
                                             absoluteSize.tuple
                                             )
 
+        topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.imageRect = self.imageSurface.get_rect(topleft=topLeft.tuple)
+        self.imageMask = mask.from_surface(self.imageSurface)
+
     def draw(self):
         newPosition = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.imageRect.topleft = newPosition.tuple
         self.windowScreen.blit(self.imageSurface, newPosition.tuple)

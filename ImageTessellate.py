@@ -1,5 +1,6 @@
 import pygame.image as image
 import pygame.transform as transform
+import pygame.mask as mask
 from pygame import Surface
 import UDim2
 import Vector2
@@ -20,11 +21,14 @@ class New:
                                             )
 
         self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple)
+        self.setImageSurfaceData()
 
         self.imageUDim2Pos = UDim2Pos
         self.anchorVector = anchorVector
 
-        self.setImageSurfaceData()
+        topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
+        self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
 
     def cropImage(self, image: Surface, areaSize: tuple) -> Surface:
         croppedImage = Surface(areaSize)
@@ -63,6 +67,10 @@ class New:
         self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple)
         self.setImageSurfaceData()
 
+        topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
+        self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
+
     def changeBaseSize(self, UDim2Scale: UDim2.New):
         self.baseAbsoluteSize = UDim2.absoluteUDim2(UDim2Scale)
 
@@ -72,6 +80,11 @@ class New:
                                             )
         self.setImageSurfaceData()
 
+        topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
+        self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
+
     def draw(self):
         newPosition = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.tessellatedImageRect.topleft = newPosition.tuple
         self.windowScreen.blit(self.tessellatedImageSurface, newPosition.tuple)

@@ -1,7 +1,7 @@
 import Image
 import UDim2
-import Enums
 import Vector2
+import collide
 
 
 class New:
@@ -24,7 +24,7 @@ class New:
     def draw(self):
         self.Image.draw()
 
-    def move(self, dt, moveDict:dict):
+    def move(self, dt, moveDict: dict, imageList: list):
         newSpeed = self.pixelsPerSecond * dt / 1000
 
         movements = {
@@ -34,6 +34,23 @@ class New:
             "D": lambda position: Vector2.New(position.X + newSpeed, position.Y),
         }
 
+        oldPos = self.Position
+        oldPosUDim2 = UDim2.New(0, oldPos.X, 0, oldPos.Y)
+        oldTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, oldPosUDim2, toPygame=True)
+
+        newPos = Vector2.New(oldPos.X, oldPos.Y)
         for key, isPressed in moveDict.items():
             if isPressed:
-                self.Position = movements[key](self.Position)
+                newPos = movements[key](newPos)
+
+        newPosUDim2 = UDim2.New(0, newPos.X, 0, newPos.Y)
+        newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
+
+        self.Image.imageRect.topleft = newTopLeft.tuple
+
+        isTouching = collide.isTouching(self.Image, imageList)
+
+        if isTouching:
+            self.Image.imageRect.topleft = oldTopLeft.tuple
+        else:
+            self.Position = newPos
