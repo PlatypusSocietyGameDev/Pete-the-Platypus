@@ -35,14 +35,13 @@ class New:
         }
 
         oldPos = self.Position
-        oldPosUDim2 = UDim2.New(0, oldPos.X, 0, oldPos.Y)
-        oldTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, oldPosUDim2, toPygame=True)
 
-        newPos = Vector2.New(oldPos.X, oldPos.Y)
+        offset = Vector2.New(0, 0)
         for key, isPressed in moveDict.items():
             if isPressed:
-                newPos = movements[key](newPos)
+                offset = movements[key](offset)
 
+        newPos = oldPos + offset
         newPosUDim2 = UDim2.New(0, newPos.X, 0, newPos.Y)
         newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
 
@@ -51,6 +50,29 @@ class New:
         isTouching = collide.isTouching(self.Image, imageList)
 
         if isTouching:
-            self.Image.imageRect.topleft = oldTopLeft.tuple
+            xOffset = Vector2.New(offset.X, 0)
+            yOffset = Vector2.New(0, offset.Y)
+
+            movementDirs = {"X": xOffset, "Y": yOffset}
+            newVectorFunction = {"X": lambda *a: Vector2.New(0, offset.Y),
+                                 "Y": lambda *a: Vector2.New(offset.X, 0)
+                                 }
+
+            for direction, newOffset in movementDirs.items():
+                newDirectionalPos = oldPos + newOffset
+                newDirectionalPosUDim2 = UDim2.New(0, newDirectionalPos.X, 0, newDirectionalPos.Y)
+                newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newDirectionalPosUDim2, toPygame=True)
+
+                self.Image.imageRect.topleft = newTopLeft.tuple
+
+                if collide.isTouching(self.Image, imageList):
+                    offset = newVectorFunction[direction]()
+
+            newPos = oldPos + offset
+            newPosUDim2 = UDim2.New(0, newPos.X, 0, newPos.Y)
+            newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
+
+            self.Image.imageRect.topleft = newTopLeft.tuple
+            self.Position = newPos
         else:
             self.Position = newPos
