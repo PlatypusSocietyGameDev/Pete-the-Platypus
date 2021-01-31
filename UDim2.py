@@ -70,7 +70,7 @@ def absoluteUDim2(UDim2Pos, func=int) -> Vector2.New:
                        )
 
 
-def getTopLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
+def getTopLeft(imageSurface: Surface, anchorVector: Vector2.New, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
     width, height = imageSurface.get_size()
 
     adjustedAnchorVector = Vector2.New(0, 1) - anchorVector
@@ -84,7 +84,7 @@ def getTopLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, toP
     return newPosition
 
 
-def getBottomLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
+def getBottomLeft(imageSurface: Surface, anchorVector: Vector2.New, anchorUDim2Pos, toPygame: bool = False) -> Vector2.New:
     width, height = imageSurface.get_size()
 
     anchorOffset = anchorVector * Vector2.New(width, height)
@@ -95,3 +95,8 @@ def getBottomLeft(imageSurface: Surface, anchorVector: Vector2, anchorUDim2Pos, 
         newPosition = Vector2.New(newPosition.X, screenHeight - newPosition.Y)
 
     return newPosition
+
+
+def Vector2ToUDim2(vector: Vector2.New) -> New:
+    return New(0, vector.X, 0, vector.Y)
+

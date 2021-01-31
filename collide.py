@@ -5,7 +5,7 @@ from typing import Union, List, TypeVar
 ImageType = TypeVar('ImageType', ImageTessellate.New, Image.New)
 
 
-def isTouching(mainSurface: Union[ImageType], obstacleImages: List[ImageType]) -> bool:
+def isTouching(mainSurface: Union[ImageType], obstacleImages: List[ImageType]) -> tuple:
     isMainImage = isinstance(mainSurface, Image.New)
     mainMask = mainSurface.imageMask if isMainImage else mainSurface.tessellatedImageMask
     mainRect = mainSurface.imageRect if isMainImage else mainSurface.tessellatedImageRect
@@ -21,4 +21,4 @@ def isTouching(mainSurface: Union[ImageType], obstacleImages: List[ImageType]) -
             overlap = mainMask.overlap(obstacleMask, offset)
 
             if overlap:
-                return True
+                return mainRect.topleft[0] + overlap[0], mainRect.topleft[1] + overlap[1]

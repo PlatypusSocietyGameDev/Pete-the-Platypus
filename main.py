@@ -67,10 +67,23 @@ DirtWalls = [
     ),
 ]
 
-# Comment the line below, if you want to test the mask collision
-del DirtWalls[-1]
 
-player = Player.New(windowScreen, Vector2.New(500, 100))
+DirtGround = ImageTessellate.New(
+    windowScreen,
+    r"assets/images/GrassBlock.png",
+
+    UDim2.New(0.5, 0, 0, 0),
+
+    UDim2.New(1, 0, 0, 75),
+    UDim2.New(0, 75, 0, 75),
+
+    Vector2.New(0.5, 0)
+)
+
+# Comment the line below, if you want to test the mask collision
+#del DirtWalls[-1]
+
+player = Player.New(windowScreen, Vector2.New(500, 1000))
 
 clock = pygame.time.Clock()
 gameFPS = 60
@@ -89,9 +102,9 @@ while running:
     #windowScreen.fill(background_colour)
 
     Background.draw()
-
     for wall in DirtWalls:
         wall.draw()
+    DirtGround.draw()
 
     player.refresh()
     player.draw()
@@ -99,9 +112,9 @@ while running:
     player.move(dt, {
         "W": keys[pygame.K_w],
         "A": keys[pygame.K_a],
-        "S": keys[pygame.K_s],
+        #"S": keys[pygame.K_s],
         "D": keys[pygame.K_d],
-    }, DirtWalls)
+    }, *DirtWalls, DirtGround)
 
     pygame.display.flip()
 

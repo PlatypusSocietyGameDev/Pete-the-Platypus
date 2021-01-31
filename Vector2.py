@@ -1,6 +1,7 @@
 from errors import VectorError
 from math import sqrt
 from dataclasses import dataclass
+import constants
 
 
 @dataclass()
@@ -95,3 +96,7 @@ class New:
 
     def __hash__(self):
         return hash(self.__key())
+
+
+def PygameToWorldVector2(pygamePos: tuple) -> New:
+    return New(pygamePos[0], constants.SCREENHEIGHT - pygamePos[1])

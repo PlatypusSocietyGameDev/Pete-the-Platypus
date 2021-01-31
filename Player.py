@@ -2,6 +2,7 @@ import Image
 import UDim2
 import Vector2
 import collide
+from pygame.draw import circle
 
 
 class New:
@@ -18,17 +19,58 @@ class New:
             Vector2.New(0.5, 0.5)
         )
 
+        self.gravitySpeed = 0
+        self.gravityIncreasePF = .5
+        self.jumping = False
+
     def refresh(self):
-        self.Image.imageUDim2Pos = UDim2.New(0, self.Position.X, 0, self.Position.Y)
+        self.Image.imageUDim2Pos = UDim2.Vector2ToUDim2(self.Position)
 
     def draw(self):
         self.Image.draw()
 
-    def move(self, dt, moveDict: dict, imageList: list):
+    def gravity(self, imageList: list):
+        self.gravitySpeed = min(self.gravitySpeed, 20)
+
+        oldPos = self.Position
+
+        newPos = oldPos + Vector2.New(0, -self.gravitySpeed)
+        newPosUDim2 = UDim2.Vector2ToUDim2(newPos)
+        newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
+
+        self.Image.imageRect.topleft = newTopLeft.tuple
+        touchPos = collide.isTouching(self.Image, imageList)
+
+        if touchPos:
+            self.jumping = False
+            
+            newPos = Vector2.PygameToWorldVector2(touchPos)
+
+            if self.jumping:
+                newPos = Vector2.New(oldPos.X, newPos.Y - self.Image.imageSurface.get_size()[1]/2)
+            else:
+                newPos = Vector2.New(oldPos.X, newPos.Y + self.Image.imageSurface.get_size()[1]/2)
+
+            newPosUDim2 = UDim2.Vector2ToUDim2(newPos)
+            newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
+
+            self.Position = newPos
+
+            #circle(self.windowScreen, (0, 0, 0), touchPos, 10)
+            self.Image.imageRect.topleft = newTopLeft.tuple
+            self.gravitySpeed = 0
+            self.gravityIncreasePF = 0.5
+
+        else:
+            self.Position = oldPos + Vector2.New(0, -self.gravitySpeed)
+            self.gravitySpeed += self.gravityIncreasePF
+
+    def move(self, dt, moveDict: dict, *imageList: list):
+        self.gravity(imageList)
+
         newSpeed = self.pixelsPerSecond * dt / 1000
 
         movements = {
-            "W": lambda position: Vector2.New(position.X, position.Y + newSpeed),
             "S": lambda position: Vector2.New(position.X, position.Y - newSpeed),
             "A": lambda position: Vector2.New(position.X - newSpeed, position.Y),
             "D": lambda position: Vector2.New(position.X + newSpeed, position.Y),
@@ -38,11 +80,19 @@ class New:
 
         offset = Vector2.New(0, 0)
         for key, isPressed in moveDict.items():
-            if isPressed:
+            if key == "W" and isPressed and not self.jumping:
+                self.jumping = True
+                self.gravityIncreasePF = -1.5
+                continue
+
+            if isPressed and key in movements:
                 offset = movements[key](offset)
 
+        if self.gravitySpeed < -20:
+            self.gravityIncreasePF = 1.5
+
         newPos = oldPos + offset
-        newPosUDim2 = UDim2.New(0, newPos.X, 0, newPos.Y)
+        newPosUDim2 = UDim2.Vector2ToUDim2(newPos)
         newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
 
         self.Image.imageRect.topleft = newTopLeft.tuple
@@ -60,7 +110,7 @@ class New:
 
             for direction, newOffset in movementDirs.items():
                 newDirectionalPos = oldPos + newOffset
-                newDirectionalPosUDim2 = UDim2.New(0, newDirectionalPos.X, 0, newDirectionalPos.Y)
+                newDirectionalPosUDim2 = UDim2.Vector2ToUDim2(newDirectionalPos)
                 newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newDirectionalPosUDim2, toPygame=True)
 
                 self.Image.imageRect.topleft = newTopLeft.tuple
@@ -69,7 +119,7 @@ class New:
                     offset = newVectorFunction[direction]()
 
             newPos = oldPos + offset
-            newPosUDim2 = UDim2.New(0, newPos.X, 0, newPos.Y)
+            newPosUDim2 = UDim2.Vector2ToUDim2(newPos)
             newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
 
             self.Image.imageRect.topleft = newTopLeft.tuple
