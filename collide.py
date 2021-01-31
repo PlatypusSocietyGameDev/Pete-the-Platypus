@@ -18,7 +18,7 @@ def isTouching(mainSurface: Union[ImageType], obstacleImages: List[ImageType]) -
             obstacleMask = image.imageMask if isImage else image.tessellatedImageMask
 
             offset = obstacleRect[0] - mainRect[0], obstacleRect[1] - mainRect[1]
-            overlap = mainMask.overlap(obstacleMask, offset)
+            collideOffset = mainMask.overlap(obstacleMask, offset)
 
-            if overlap:
-                return mainRect.topleft[0] + overlap[0], mainRect.topleft[1] + overlap[1]
+            if collideOffset:
+                return collideOffset

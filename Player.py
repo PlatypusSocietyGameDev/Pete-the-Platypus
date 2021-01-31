@@ -39,28 +39,27 @@ class New:
         newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
 
         self.Image.imageRect.topleft = newTopLeft.tuple
-        touchPos = collide.isTouching(self.Image, imageList)
+        offsetPos = collide.isTouching(self.Image, imageList)
 
-        if touchPos:
+        if offsetPos:
             self.jumping = False
-            
-            newPos = Vector2.PygameToWorldVector2(touchPos)
 
-            if self.jumping:
-                newPos = Vector2.New(oldPos.X, newPos.Y - self.Image.imageSurface.get_size()[1]/2)
-            else:
-                newPos = Vector2.New(oldPos.X, newPos.Y + self.Image.imageSurface.get_size()[1]/2)
+            offsetPos = Vector2.New(*offsetPos)
+            playerSize = self.Image.imageSurface.get_size()
+            distToBottom = playerSize[1] - offsetPos.Y
+            collidePos = self.Position + offsetPos
+            newBottom = collidePos + Vector2.New(0, distToBottom)
+            newPos = Vector2.New(oldPos.X, newBottom.Y - playerSize[1])
 
             newPosUDim2 = UDim2.Vector2ToUDim2(newPos)
             newTopLeft = UDim2.getTopLeft(self.Image.imageSurface, self.Image.anchorVector, newPosUDim2, toPygame=True)
 
             self.Position = newPos
 
-            #circle(self.windowScreen, (0, 0, 0), touchPos, 10)
+            #circle(self.windowScreen, (0, 0, 0), newTopLeft.tuple, 10)
             self.Image.imageRect.topleft = newTopLeft.tuple
             self.gravitySpeed = 0
             self.gravityIncreasePF = 0.5
-
         else:
             self.Position = oldPos + Vector2.New(0, -self.gravitySpeed)
             self.gravitySpeed += self.gravityIncreasePF
