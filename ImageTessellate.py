@@ -4,6 +4,7 @@ import pygame.mask as mask
 from pygame import Surface
 import UDim2
 import Vector2
+import collide
 
 
 class New:
@@ -29,6 +30,18 @@ class New:
         topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
         self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
         self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
+
+    def getSurface(self):
+        return self.tessellatedImageSurface
+
+    def getMask(self):
+        return self.tessellatedImageMask
+
+    def getRect(self):
+        return self.tessellatedImageRect
+
+    def getTopLeft(self) -> Vector2.New:
+        return UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
 
     def cropImage(self, image: Surface, areaSize: tuple) -> Surface:
         croppedImage = Surface(areaSize)
@@ -88,3 +101,15 @@ class New:
         newPosition = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
         self.tessellatedImageRect.topleft = newPosition.tuple
         self.windowScreen.blit(self.tessellatedImageSurface, newPosition.tuple)
+
+    def willCollide(self, newPos: Vector2.New, colliders: list) -> tuple:
+        oldTopLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+
+        newPosUDim2 = UDim2.fromVector2(newPos)
+        newTopLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, newPosUDim2, toPygame=True)
+
+        self.tessellatedImageRect.topleft = newTopLeft.tuple
+        offset, hitImage = collide.isTouching(self, colliders)
+        self.tessellatedImageRect.topleft = oldTopLeft.tuple
+
+        return offset, image

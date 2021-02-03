@@ -97,6 +97,6 @@ def getBottomLeft(imageSurface: Surface, anchorVector: Vector2.New, anchorUDim2P
     return newPosition
 
 
-def Vector2ToUDim2(vector: Vector2.New) -> New:
+def fromVector2(vector: Vector2.New) -> New:
     return New(0, vector.X, 0, vector.Y)
 

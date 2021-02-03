@@ -38,9 +38,9 @@ DirtWalls = [
         windowScreen,
         r"assets/images/DirtWalls1.png",
 
-        UDim2.New(0, 0, 0, 0),
+        UDim2.New(0, 0, 0, 75),
 
-        UDim2.New(0, 200, 1, 0),
+        UDim2.New(0, 200, 1, -75),
         UDim2.New(0, 150, 0, 150),
 
         Vector2.New(0, 0)
@@ -50,20 +50,12 @@ DirtWalls = [
         windowScreen,
         r"assets/images/DirtWalls1.png",
 
-        UDim2.New(1, -200, 0, 0),
+        UDim2.New(1, -200, 0, 75),
 
-        UDim2.New(0, 200, 1, 0),
+        UDim2.New(0, 200, 1, -75),
         UDim2.New(0, 150, 0, 150),
 
         Vector2.New(0, 0)
-    ),
-
-    Image.New(
-        windowScreen,
-        r"assets/images/obstacleMaskTest.png",
-        UDim2.New(.5, 0, .5, 0),
-        UDim2.New(0, 500, 0, 500),
-        Vector2.New(.5, .5)
     ),
 ]
 
@@ -80,41 +72,65 @@ DirtGround = ImageTessellate.New(
     Vector2.New(0.5, 0)
 )
 
-# Comment the line below, if you want to test the mask collision
-#del DirtWalls[-1]
+TestDirtBlock = Image.New(
+    windowScreen,
+    r"assets/images/GrassBlock.png",
+
+    UDim2.New(.5, 0, .5, 0),
+    UDim2.New(0, 100, 0, 100),
+    Vector2.New(.5, .5) 
+)
 
 player = Player.New(windowScreen, Vector2.New(500, 1000))
+player.addObstacle(*DirtWalls, DirtGround)
+player.addWall(*DirtWalls)
 
 clock = pygame.time.Clock()
 gameFPS = 60
+fps = []
 
 while running:
     s = time()
 
     dt = clock.tick(60)
-    pygame.display.set_caption(f'Pete the Platypus {gameFPS}')
-
+    fps.append(gameFPS)
+    pygame.display.set_caption(f'Pete the Platypus, Average: {round(sum(fps) / len(fps), 2)}')
+    
     keys = pygame.key.get_pressed()
+
+    eventKeys = []
+    mouseDown = False
     for event in pygame.event.get():
         if event.type == pygame.QUIT or keys[pygame.K_ESCAPE]:
             running = False
 
+        elif event.type == pygame.KEYDOWN:
+            eventKeys.append(event.key)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouseDown = True
+
     #windowScreen.fill(background_colour)
 
     Background.draw()
-    for wall in DirtWalls:
-        wall.draw()
-    DirtGround.draw()
+
+    player.drawValidWalls()
+    player.drawWalls()
+    player.drawObstacles()
+
+    TestDirtBlock.draw()
 
     player.refresh()
+    #aplayer.drawRadius()
     player.draw()
+    player.placeBlock(eventKeys, pygame.mouse.get_pos(), mouseDown)
 
     player.move(dt, {
         "W": keys[pygame.K_w],
         "A": keys[pygame.K_a],
         #"S": keys[pygame.K_s],
         "D": keys[pygame.K_d],
-    }, *DirtWalls, DirtGround)
+    })
 
     pygame.display.flip()
 

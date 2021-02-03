@@ -98,5 +98,27 @@ class New:
         return hash(self.__key())
 
 
-def PygameToWorldVector2(pygamePos: tuple) -> New:
+def ToPygame(pygamePos, isVector=False) -> New:
+    if isVector:
+        return New(pygamePos.X, constants.SCREENHEIGHT - pygamePos.Y)
+
+    return New(pygamePos[0], constants.SCREENHEIGHT - pygamePos[1])
+
+
+def inScreen(pygameCoord: New, include: bool = False):
+    includeBoundFunctions = {
+        False: lambda minBound, value, maxBound: minBound < value < maxBound,
+        True: lambda minBound, value, maxBound: minBound <= value <= maxBound,
+    }
+
+    boundFunction = includeBoundFunctions[include]
+
+    return boundFunction(0, pygameCoord.X, constants.SCREENWIDTH) and \
+           boundFunction(0, pygameCoord.Y, constants.SCREENHEIGHT)
+
+
+def ToWorld(pygamePos, isVector=False) -> New:
+    if isVector:
+        return New(pygamePos.X, constants.SCREENHEIGHT - pygamePos.Y)
+
     return New(pygamePos[0], constants.SCREENHEIGHT - pygamePos[1])
