@@ -117,6 +117,13 @@ def inScreen(pygameCoord: New, include: bool = False):
            boundFunction(0, pygameCoord.Y, constants.SCREENHEIGHT)
 
 
+def average(v1: New, v2: New) -> New:
+    def avg(num1: float, num2: float) -> float:
+        return (num1 + num2) / 2
+
+    return New(avg(v1.X, v2.X), avg(v1.Y, v2.Y))
+
+
 def ToWorld(pygamePos, isVector=False) -> New:
     if isVector:
         return New(pygamePos.X, constants.SCREENHEIGHT - pygamePos.Y)

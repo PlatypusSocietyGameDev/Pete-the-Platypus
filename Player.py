@@ -82,6 +82,11 @@ class New:
         # Directions are either left or right of a block
         if self.placingBlocks:
             for wall in self.walls:
+                closeEnough = wall.closeEnough(self.Position, self.placeRangeRadius, 1)
+
+                if not closeEnough:
+                    continue
+
                 size = wall.getSurface().get_size()
                 topLeft = wall.getTopLeft()
                 topRight = topLeft + Vector2.New(size[0], 0)
@@ -111,60 +116,41 @@ class New:
 
         self.placingBlocks = self.woodToggle or self.brickToggle
         mouseVec = Vector2.New(*mousePosition)
+        mouseWorld = Vector2.ToWorld(mouseVec, isVector=True)
 
         image = self.tempWoodImage if self.woodToggle else self.tempBrickImage
-        size = image.getSurface().get_size()
-        sizeVec = Vector2.New(*size)
+        image.imageUDim2Pos = UDim2.fromVector2(mouseWorld)
 
         if self.placingBlocks:
-            newPosition = Vector2.ToWorld(mousePosition)
-            offset, hitImage = image.willCollide(newPosition, self.walls)
+            offset, hitImage = image.willCollide(mouseWorld, self.walls)
 
-            image.imageUDim2Pos = UDim2.fromVector2(newPosition)
+            if hitImage:
+                if False:
+                    topLeft = image.getTopLeft()
+                    hitPos = topLeft + Vector2.New(*offset)
+                    circle(self.windowScreen, (0, 0, 0), hitPos.tuple, 10)
 
-            if offset:
-                origTopLeft = hitImage.getTopLeft()
-                imageSize = hitImage.getSurface().get_size()
-
-                topLeft = Vector2.ToWorld(origTopLeft, isVector=True)
-                topRight = Vector2.ToWorld(origTopLeft + Vector2.New(imageSize[0], 0), isVector=True)
-
-                leftDist = (topLeft - newPosition).magnitude
-                rightDist = (topRight - newPosition).magnitude
-
-                #print(leftDist, rightDist)
-                #print(topLeft, topRight)
-
-                leftFurther = leftDist > rightDist
-                adjustedPosition = newPosition
-
-                for _ in range(2):
-                    if leftFurther:
-                        adjustedPosition = Vector2.New(topRight.X, newPosition.Y + size[1]/2)
-                    else:
-                        adjustedPosition = Vector2.New(topLeft.X - size[0], newPosition.Y + size[1]/2)
-
-                    image.setTopLeft(adjustedPosition)
-
-                    if image.offScreen():
-                        leftFurther = not leftFurther
-                    else:
-                        break
-
-                if mouseDown:
-                    newImage = Image.New(image.windowScreen,
-                                         image.imagePath,
-                                         UDim2.fromVector2(adjustedPosition),
-                                         self.placeSize,
-                                         Vector2.New(0, 1))
-
-                    self.addWall(newImage)
-                    self.addObstacle(newImage)
+                collide.repositionAfterCollision(mouseWorld, hitImage, image)
 
             image.draw()
 
-            if not offset:
-                self.windowScreen.blit(self.badHighlight, (mouseVec - sizeVec / 2).tuple)
+            dist = (UDim2.absoluteUDim2(image.imageUDim2Pos) - self.Position).magnitude
+            hitPlayerOffset, _ = collide.isTouching(self.Image, [image])
+
+            if dist > self.placeRangeRadius or not hitImage or hitPlayerOffset:
+                self.windowScreen.blit(self.badHighlight, image.getTopLeft().tuple)
+            elif mouseDown and hitImage and not hitPlayerOffset:
+                newImage = Image.New(
+                    self.windowScreen,
+                    image.imagePath,
+
+                    image.imageUDim2Pos,
+                    self.placeSize,
+                    image.anchorVector
+                )
+
+                self.addObstacle(newImage)
+                self.addWall(newImage)
 
     def gravity(self):
         self.gravitySpeed = min(self.gravitySpeed, 20)
@@ -208,6 +194,8 @@ class New:
         }
 
         oldPos = self.Position
+        repositionFlip = False
+        repositionHitImage = None
 
         offset = Vector2.New(0, 0)
         for key, isPressed in moveDict.items():
@@ -226,6 +214,15 @@ class New:
 
             if self.movingRight != self.Image.lookRight:
                 self.Image.xFlip()
+
+                tempObstacles = self.obstacles.copy()
+                del tempObstacles[0]  # Ground
+
+                hitPlayerOffset, hitImage = collide.isTouching(self.Image, tempObstacles)
+
+                if hitPlayerOffset:
+                    repositionFlip = True
+                    repositionHitImage = hitImage
 
         if self.gravitySpeed < -15:
             self.gravityIncreasePF = 2
@@ -254,3 +251,8 @@ class New:
             self.Position = newPos
         else:
             self.Position = newPos
+
+        if repositionFlip:
+            sideIndex = 1 if self.movingRight else 3
+            collide.repositionAfterCollision(self.Position, repositionHitImage, self.Image, forceSideIndex=sideIndex)
+            self.Position = UDim2.absoluteUDim2(self.Image.imageUDim2Pos)

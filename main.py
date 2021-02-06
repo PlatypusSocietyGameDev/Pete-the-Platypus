@@ -82,7 +82,7 @@ TestDirtBlock = Image.New(
 )
 
 player = Player.New(windowScreen, Vector2.New(500, 1000))
-player.addObstacle(*DirtWalls, DirtGround)
+player.addObstacle(DirtGround, *DirtWalls)
 player.addWall(*DirtWalls)
 
 clock = pygame.time.Clock()
@@ -113,6 +113,7 @@ while running:
     #windowScreen.fill(background_colour)
 
     Background.draw()
+    player.drawRadius()
 
     player.drawValidWalls()
     player.drawWalls()
@@ -121,7 +122,6 @@ while running:
     TestDirtBlock.draw()
 
     player.refresh()
-    #aplayer.drawRadius()
     player.draw()
     player.placeBlock(eventKeys, pygame.mouse.get_pos(), mouseDown)
 

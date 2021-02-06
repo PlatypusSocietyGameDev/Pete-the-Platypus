@@ -43,6 +43,31 @@ class New:
     def getTopLeft(self) -> Vector2.New:
         return UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
 
+    def closeEnough(self, newPoint: Vector2.New, distRange: int, threshold: int = 4):
+        distances = [(point - newPoint).magnitude for point in self.getWorldCorners()]
+        inRange = [dist < distRange for dist in distances]
+
+        return inRange.count(True) >= threshold
+
+    def setTopLeft(self, newPosition: Vector2.New):
+        size = Vector2.New(*self.tessellatedImageSurface.get_size())
+        offset = self.anchorVector * size * Vector2.New(1, -1)
+
+        self.tessellatedImageRect.topleft = Vector2.ToPygame(newPosition, isVector=True).tuple
+        self.imageUDim2Pos = UDim2.fromVector2(newPosition + offset)
+
+    def getWorldCorners(self):
+        size = self.getSurface().get_size()
+
+        topLeft = self.getTopLeft()
+        topLeft = Vector2.ToWorld(topLeft, isVector=True)
+        topRight = topLeft + Vector2.New(size[0], 0)
+
+        bottomLeft = topLeft + Vector2.New(0, -size[1])
+        bottomRight = topRight + Vector2.New(0, -size[1])
+
+        return topLeft, topRight, bottomRight, bottomLeft
+
     def cropImage(self, image: Surface, areaSize: tuple) -> Surface:
         croppedImage = Surface(areaSize)
         croppedImage.blit(image, (0, 0), (0, 0, *areaSize))
