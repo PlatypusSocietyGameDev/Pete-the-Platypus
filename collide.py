@@ -1,14 +1,21 @@
 import Vector2
+import UDim2
 
 
-def isTouching(mainSurface, obstacleImages) -> tuple:
+def isTouching(mainSurface, obstacleImages, reachDist: int = None) -> tuple:
     mainMask = mainSurface.getMask()
     mainRect = mainSurface.getRect()
 
-    for image in obstacleImages:
+    for image in obstacleImages[::-1]:
+        if image is mainSurface:
+            continue
+        
         obstacleRect = image.getRect()
+        """dist = (
+            UDim2.absoluteUDim2(mainSurface.imageUDim2Pos) - UDim2.absoluteUDim2(image.imageUDim2Pos)
+        ).magnitude"""
 
-        if mainRect.colliderect(obstacleRect):
+        if mainRect.colliderect(obstacleRect): # and (True if reachDist is not None else dist + image.bestTouch > reachDist):
             obstacleMask = image.getMask()
 
             offset = obstacleRect[0] - mainRect[0], obstacleRect[1] - mainRect[1]
@@ -19,6 +26,31 @@ def isTouching(mainSurface, obstacleImages) -> tuple:
 
     return None, None
 
+
+def countTouchers(mainSurface, obstacleImages) -> int:
+    mainMask = mainSurface.getMask()
+    mainRect = mainSurface.getRect()
+    count = 0
+
+    for image in obstacleImages[::-1]:
+        if image is mainSurface:
+            continue
+        
+        obstacleRect = image.getRect()
+        """dist = (
+            UDim2.absoluteUDim2(mainSurface.imageUDim2Pos) - UDim2.absoluteUDim2(image.imageUDim2Pos)
+        ).magnitude"""
+
+        if mainRect.colliderect(obstacleRect): # and (True if reachDist is not None else dist + image.bestTouch > reachDist):
+            obstacleMask = image.getMask()
+
+            offset = obstacleRect[0] - mainRect[0], obstacleRect[1] - mainRect[1]
+            collideOffset = mainMask.overlap(obstacleMask, offset)
+
+            if collideOffset:
+                count += 1
+
+    return count
 
 def getClosestIndex(image, pos: Vector2.New) -> int:
     corners = image.getWorldCorners()
@@ -61,7 +93,7 @@ def getClosestIndex(image, pos: Vector2.New) -> int:
     return closestI
 
 
-def repositionAfterCollision(newCentrePosition: Vector2.New, hitImage, targetImage, forceSideIndex: int = None):
+def repositionAfterCollision(newCentrePosition: Vector2.New, hitImage, targetImage, forceSideIndex: int = None, customFunction=None):
     targetImageSize = Vector2.New(*targetImage.getSurface().get_size())
     hitImageSize = Vector2.New(*hitImage.getSurface().get_size())
 
@@ -88,8 +120,8 @@ def repositionAfterCollision(newCentrePosition: Vector2.New, hitImage, targetIma
         for _ in range(2):
             multiplier = 1 if closestI == 0 else -1
 
-            topRightImage = hitTopLeftWorld + Vector2.New(0, hitImageSize.Y) * multiplier
-            newPos = Vector2.New(newCentrePosition.X - targetImageSize.X/2, topRightImage.Y)
+            topLeftImage = hitTopLeftWorld + Vector2.New(0, hitImageSize.Y) * multiplier
+            newPos = Vector2.New(newCentrePosition.X - targetImageSize.X/2, topLeftImage.Y)
             targetImage.setTopLeft(newPos)
 
             if targetImage.offScreen():

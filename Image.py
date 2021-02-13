@@ -1,10 +1,11 @@
 import pygame.image as image
 import pygame.transform as transform
 import pygame.mask as mask
-from pygame import Surface
+from pygame import Surface, SRCALPHA
 import UDim2
 import Vector2
 import collide
+from pygame.draw import lines
 
 
 class New:
@@ -12,7 +13,7 @@ class New:
         self.windowScreen = windowScreen
 
         self.imagePath = imagePath
-        self.imageSurface = image.load(self.imagePath)
+        self.imageSurface = image.load(self.imagePath).convert_alpha()
 
         absoluteSize = UDim2.absoluteUDim2(UDim2Scale)
 
@@ -27,6 +28,20 @@ class New:
         topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
         self.imageRect = self.imageSurface.get_rect(topleft=topLeft.tuple)
         self.imageMask = mask.from_surface(self.imageSurface)
+
+        self.wall = Surface(absoluteSize.tuple, SRCALPHA)
+        lines(self.wall, (80, 220, 100), True, (
+            (0, 0), (absoluteSize.X, 0), absoluteSize.tuple, (0, absoluteSize.Y)
+        ), 3)
+
+        self.bestTouch = absoluteSize.magnitude / 2
+
+    def getSize(self):
+        return Vector2.New(*self.imageSurface.get_size())
+
+    def drawWall(self):
+        topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.windowScreen.blit(self.wall, topLeft.tuple)
 
     def xFlip(self):
         self.imageSurface = transform.flip(self.imageSurface, True, False)
@@ -73,6 +88,12 @@ class New:
 
         return topLeft, topRight, bottomRight, bottomLeft
 
+    def getPygameCorners(self):
+        corners = self.getWorldCorners()
+        newCorners = [Vector2.ToPygame(cornerPos, isVector=True) for cornerPos in corners]
+
+        return newCorners
+
     def offScreen(self, threshold: int = 4):
         size = self.getSurface().get_size()
 
@@ -96,6 +117,13 @@ class New:
         topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
         self.imageRect = self.imageSurface.get_rect(topleft=topLeft.tuple)
         self.imageMask = mask.from_surface(self.imageSurface)
+        
+        self.wall = Surface(absoluteSize.tuple, SRCALPHA)
+        lines(self.wall, (80, 220, 100), True, (
+            (0, 0), (absoluteSize.X, 0), absoluteSize.tuple, (0, absoluteSize.Y)
+        ), 3)
+
+        self.bestTouch = absoluteSize.magnitude / 2
 
     def draw(self):
         newPosition = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
@@ -119,7 +147,7 @@ class New:
         self.imageRect.topleft = newTopLeft.tuple
         self.imageUDim2Pos = newPosUDim2
 
-        offset, image = collide.isTouching(self, colliders)
+        offset, image = collide.isTouching(self, colliders, self.bestTouch)
 
         self.imageRect.topleft = oldTopLeft.tuple
         self.imageUDim2Pos = oldPosUDim2

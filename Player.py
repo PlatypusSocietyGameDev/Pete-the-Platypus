@@ -3,7 +3,7 @@ import UDim2
 import Vector2
 import collide
 from pygame import K_q, K_e
-from pygame.draw import circle
+from pygame.draw import circle, lines
 from miscellaneous import drawtext, fillSurfaceTransparency
 import alphadraw
 
@@ -82,18 +82,16 @@ class New:
         # Directions are either left or right of a block
         if self.placingBlocks:
             for wall in self.walls:
-                closeEnough = wall.closeEnough(self.Position, self.placeRangeRadius, 1)
+                closeEnough = wall.closeEnough(self.Position,
+                                               self.placeRangeRadius + UDim2.absoluteUDim2(self.placeSize).X/2,
+                                               1)
 
                 if not closeEnough:
                     continue
 
-                size = wall.getSurface().get_size()
-                topLeft = wall.getTopLeft()
-                topRight = topLeft + Vector2.New(size[0], 0)
+                wall.drawWall()
 
-                xLength = self.placeSize.X.Offset
-                alphadraw.rect(self.windowScreen, (80, 220, 100, 200), (*topRight.tuple, xLength, size[1]))
-                alphadraw.rect(self.windowScreen, (80, 220, 100, 200), (*(topLeft - Vector2.New(xLength, 0)).tuple, self.placeSize.X.Offset, size[1]))
+                #alphadraw.rect(self.windowScreen, (80, 220, 100, 100), (*topLeft.tuple, *size))
 
     def refresh(self):
         self.Image.imageUDim2Pos = UDim2.fromVector2(self.Position)
@@ -123,8 +121,9 @@ class New:
 
         if self.placingBlocks:
             offset, hitImage = image.willCollide(mouseWorld, self.walls)
-
+            hits = 0
             if hitImage:
+                hits = collide.countTouchers(image, self.walls)
                 if False:
                     topLeft = image.getTopLeft()
                     hitPos = topLeft + Vector2.New(*offset)
@@ -135,11 +134,12 @@ class New:
             image.draw()
 
             dist = (UDim2.absoluteUDim2(image.imageUDim2Pos) - self.Position).magnitude
-            hitPlayerOffset, _ = collide.isTouching(self.Image, [image])
+            hitPlayerOffset, _ = collide.isTouching(self.Image, [image], self.placeRangeRadius)
 
-            if dist > self.placeRangeRadius or not hitImage or hitPlayerOffset:
+            if dist > self.placeRangeRadius or not hitImage or hitPlayerOffset or hits > 1 or hits == 0:
                 self.windowScreen.blit(self.badHighlight, image.getTopLeft().tuple)
-            elif mouseDown and hitImage and not hitPlayerOffset:
+
+            elif mouseDown and hitImage and not hitPlayerOffset and hits == 1:
                 newImage = Image.New(
                     self.windowScreen,
                     image.imagePath,
@@ -215,10 +215,10 @@ class New:
             if self.movingRight != self.Image.lookRight:
                 self.Image.xFlip()
 
-                tempObstacles = self.obstacles.copy()
+                tempObstacles = self.walls.copy()
                 del tempObstacles[0]  # Ground
 
-                hitPlayerOffset, hitImage = collide.isTouching(self.Image, tempObstacles)
+                hitPlayerOffset, hitImage = collide.isTouching(self.Image, tempObstacles, self.Image.bestTouch)
 
                 if hitPlayerOffset:
                     repositionFlip = True
@@ -253,6 +253,14 @@ class New:
             self.Position = newPos
 
         if repositionFlip:
-            sideIndex = 1 if self.movingRight else 3
-            collide.repositionAfterCollision(self.Position, repositionHitImage, self.Image, forceSideIndex=sideIndex)
+            origTopLeft = Vector2.ToWorld(self.Image.getTopLeft(), isVector=True)
+            if not self.movingRight:
+                hitImageTopLeft = Vector2.ToWorld(repositionHitImage.getTopLeft(), isVector=True)
+                imageSize = self.Image.getSize()
+                self.Image.setTopLeft(Vector2.New(hitImageTopLeft.X-imageSize.X, origTopLeft.Y))
+            else:
+                imageSize = repositionHitImage.getSize()
+                hitImageTopRight = Vector2.ToWorld(repositionHitImage.getTopLeft(), isVector=True) + Vector2.New(imageSize.X, 0)
+                self.Image.setTopLeft(Vector2.New(hitImageTopRight.X, origTopLeft.Y))
+
             self.Position = UDim2.absoluteUDim2(self.Image.imageUDim2Pos)

@@ -1,10 +1,11 @@
 import pygame.image as image
 import pygame.transform as transform
 import pygame.mask as mask
-from pygame import Surface
+from pygame import Surface, SRCALPHA
 import UDim2
 import Vector2
 import collide
+from pygame.draw import lines
 
 
 class New:
@@ -12,7 +13,7 @@ class New:
         self.windowScreen = windowScreen
 
         self.imagePath = imagePath
-        self.imageSurface = image.load(self.imagePath)
+        self.imageSurface = image.load(self.imagePath).convert_alpha()
 
         self.totalAbsoluteSize = UDim2.absoluteUDim2(TotalUDim2Scale)
         self.baseAbsoluteSize = UDim2.absoluteUDim2(BaseImageUDim2Scale)
@@ -30,6 +31,19 @@ class New:
         topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
         self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
         self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
+
+        self.wall = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
+        lines(self.wall, (80, 220, 100), True, (
+            (0, 0),
+            (self.totalAbsoluteSize.X, 0),
+            self.totalAbsoluteSize.tuple,
+            (0, self.totalAbsoluteSize.Y)
+        ), 3)
+
+        self.bestTouch = self.totalAbsoluteSize.magnitude / 2
+
+    def getSize(self):
+        return Vector2.New(*self.tessellatedImageSurface.get_size())
 
     def getSurface(self):
         return self.tessellatedImageSurface
@@ -67,6 +81,12 @@ class New:
         bottomRight = topRight + Vector2.New(0, -size[1])
 
         return topLeft, topRight, bottomRight, bottomLeft
+
+    def getPygameCorners(self):
+        corners = self.getWorldCorners()
+        newCorners = [Vector2.ToPygame(cornerPos, isVector=True) for cornerPos in corners]
+
+        return newCorners
 
     def cropImage(self, image: Surface, areaSize: tuple) -> Surface:
         croppedImage = Surface(areaSize)
@@ -109,6 +129,16 @@ class New:
         self.tessellatedImageRect = self.tessellatedImageSurface.get_rect(topleft=topLeft.tuple)
         self.tessellatedImageMask = mask.from_surface(self.tessellatedImageSurface)
 
+        self.wall = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
+        lines(self.wall, (80, 220, 100), True, (
+            (0, 0),
+            (self.totalAbsoluteSize.X, 0),
+            self.totalAbsoluteSize.tuple,
+            (0, self.totalAbsoluteSize.Y)
+        ), 3)
+
+        self.bestTouch = self.totalAbsoluteSize.magnitude / 2
+
     def changeBaseSize(self, UDim2Scale: UDim2.New):
         self.baseAbsoluteSize = UDim2.absoluteUDim2(UDim2Scale)
 
@@ -127,6 +157,10 @@ class New:
         self.tessellatedImageRect.topleft = newPosition.tuple
         self.windowScreen.blit(self.tessellatedImageSurface, newPosition.tuple)
 
+    def drawWall(self):
+        topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.windowScreen.blit(self.wall, topLeft.tuple)
+
     def willCollide(self, newPos: Vector2.New, colliders: list) -> tuple:
         oldTopLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
 
@@ -134,7 +168,7 @@ class New:
         newTopLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, newPosUDim2, toPygame=True)
 
         self.tessellatedImageRect.topleft = newTopLeft.tuple
-        offset, hitImage = collide.isTouching(self, colliders)
+        offset, hitImage = collide.isTouching(self, colliders, self.bestTouch)
         self.tessellatedImageRect.topleft = oldTopLeft.tuple
 
         return offset, image

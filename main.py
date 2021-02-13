@@ -94,7 +94,7 @@ while running:
 
     dt = clock.tick(60)
     fps.append(gameFPS)
-    pygame.display.set_caption(f'Pete the Platypus, Average: {round(sum(fps) / len(fps), 2)}')
+    pygame.display.set_caption(f'Pete the Platypus, Average: {gameFPS}')
     
     keys = pygame.key.get_pressed()
 
@@ -115,9 +115,9 @@ while running:
     Background.draw()
     player.drawRadius()
 
-    player.drawValidWalls()
     player.drawWalls()
     player.drawObstacles()
+    player.drawValidWalls()
 
     TestDirtBlock.draw()
 
