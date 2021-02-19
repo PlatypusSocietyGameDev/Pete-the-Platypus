@@ -13,6 +13,7 @@ class New:
         self.windowScreen = windowScreen
 
         self.imagePath = imagePath
+
         self.imageSurface = image.load(self.imagePath).convert_alpha()
 
         self.totalAbsoluteSize = UDim2.absoluteUDim2(TotalUDim2Scale)
@@ -22,7 +23,7 @@ class New:
                                             self.baseAbsoluteSize.tuple
                                             )
 
-        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple)
+        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
         self.setImageSurfaceData()
 
         self.imageUDim2Pos = UDim2Pos
@@ -89,7 +90,7 @@ class New:
         return newCorners
 
     def cropImage(self, image: Surface, areaSize: tuple) -> Surface:
-        croppedImage = Surface(areaSize)
+        croppedImage = Surface(areaSize, SRCALPHA)
         croppedImage.blit(image, (0, 0), (0, 0, *areaSize))
 
         return croppedImage
@@ -107,10 +108,16 @@ class New:
             self.tessellatedImageSurface = croppedImage
             return
 
-        xMaxFit = self.totalAbsoluteSize.X // self.baseAbsoluteSize.X + 2
-        yMaxFit = self.totalAbsoluteSize.Y // self.baseAbsoluteSize.Y + 2
+        xMaxFit = self.totalAbsoluteSize.X // self.baseAbsoluteSize.X
+        yMaxFit = self.totalAbsoluteSize.Y // self.baseAbsoluteSize.Y
 
-        newScreen = Surface(self.totalAbsoluteSize.tuple)
+        if self.totalAbsoluteSize.X % self.baseAbsoluteSize.X != 0:
+            xMaxFit += 1
+
+        if self.totalAbsoluteSize.Y % self.baseAbsoluteSize.Y != 0:
+            yMaxFit += 1
+
+        newScreen = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
 
         for xTimes in range(xMaxFit):
             for yTimes in range(yMaxFit):
@@ -122,7 +129,7 @@ class New:
     def changeTotalSize(self, UDim2Scale: UDim2.New):
         self.totalAbsoluteSize = UDim2.absoluteUDim2(UDim2Scale)
 
-        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple)
+        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
         self.setImageSurfaceData()
 
         topLeft = UDim2.getTopLeft(self.tessellatedImageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
@@ -142,7 +149,7 @@ class New:
     def changeBaseSize(self, UDim2Scale: UDim2.New):
         self.baseAbsoluteSize = UDim2.absoluteUDim2(UDim2Scale)
 
-        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple)
+        self.tessellatedImageSurface = Surface(self.totalAbsoluteSize.tuple, SRCALPHA)
         self.imageSurface = transform.scale(self.imageSurface,
                                             self.baseAbsoluteSize.tuple
                                             )

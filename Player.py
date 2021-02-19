@@ -22,6 +22,8 @@ class New:
             Vector2.New(0.5, 0.5)
         )
 
+        self.dead = False
+
         self.gravitySpeed = 0
         self.gravityIncreasePF = .5
         self.movingRight = True

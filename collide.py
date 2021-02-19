@@ -2,6 +2,21 @@ import Vector2
 import UDim2
 
 
+def isRectTouching(mainSurface, obstacleImages):
+    mainRect = mainSurface.getRect()
+
+    for image in obstacleImages[::-1]:
+        if image is mainSurface:
+            continue
+
+        obstacleRect = image.getRect()
+
+        if mainRect.colliderect(obstacleRect):
+            return image
+
+    return None
+
+
 def isTouching(mainSurface, obstacleImages, reachDist: int = None) -> tuple:
     mainMask = mainSurface.getMask()
     mainRect = mainSurface.getRect()

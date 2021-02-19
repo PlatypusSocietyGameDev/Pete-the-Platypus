@@ -8,6 +8,7 @@ import Vector2
 from miscellaneous import drawtext
 import ImageTessellate
 from time import time
+import Lava
 
 
 pygame.init()
@@ -85,6 +86,8 @@ player = Player.New(windowScreen, Vector2.New(500, 1000))
 player.addObstacle(DirtGround, *DirtWalls)
 player.addWall(*DirtWalls)
 
+lava = Lava.New(windowScreen, 5, player)
+
 clock = pygame.time.Clock()
 gameFPS = 60
 fps = []
@@ -113,24 +116,34 @@ while running:
     #windowScreen.fill(background_colour)
 
     Background.draw()
-    player.drawRadius()
+
+    if not player.dead:
+        player.drawRadius()
 
     player.drawWalls()
     player.drawObstacles()
-    player.drawValidWalls()
+
+    if not player.dead:
+        player.drawValidWalls()
 
     TestDirtBlock.draw()
 
     player.refresh()
-    player.draw()
-    player.placeBlock(eventKeys, pygame.mouse.get_pos(), mouseDown)
 
-    player.move(dt, {
-        "W": keys[pygame.K_w],
-        "A": keys[pygame.K_a],
-        #"S": keys[pygame.K_s],
-        "D": keys[pygame.K_d],
-    })
+    if not player.dead:
+        player.draw()
+        player.placeBlock(eventKeys, pygame.mouse.get_pos(), mouseDown)
+
+        player.move(dt, {
+            "W": keys[pygame.K_w],
+            "A": keys[pygame.K_a],
+            #"S": keys[pygame.K_s],
+            "D": keys[pygame.K_d],
+        })
+
+        lava.touchPlayer()
+
+    lava.draw(dt)
 
     pygame.display.flip()
 
