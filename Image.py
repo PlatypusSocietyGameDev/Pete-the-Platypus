@@ -36,6 +36,27 @@ class New:
 
         self.bestTouch = absoluteSize.magnitude / 2
 
+        self.rotations = {}
+
+    def initialiseRotations(self, start, end):
+        for angle in range(start, end+1):
+            newImage = transform.rotate(self.imageSurface, angle)
+
+            self.rotations[angle] = newImage
+
+    def reload(self):
+        topLeft = UDim2.getTopLeft(self.imageSurface, self.anchorVector, self.imageUDim2Pos, toPygame=True)
+        self.imageRect = self.imageSurface.get_rect(topleft=topLeft.tuple)
+        self.imageMask = mask.from_surface(self.imageSurface)
+
+    def setRotation(self, newAngle):
+        if newAngle in self.rotations:
+            self.imageSurface = self.rotations[newAngle]
+        else:
+            self.imageSurface = transform.rotate(self.imageSurface, newAngle)
+
+        self.reload()
+
     def getSize(self):
         return Vector2.New(*self.imageSurface.get_size())
 

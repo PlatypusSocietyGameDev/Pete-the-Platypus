@@ -43,7 +43,7 @@ class New:
     def draw(self, dt):
         self.framePassed += 1
 
-        if self.framePassed >= 600:
+        if self.framePassed >= 60:
             newSpeed = self.pixelsPerSecond * dt / 1000
             self.yHeight += newSpeed
 
@@ -53,3 +53,4 @@ class New:
 
         self.LavaMain.draw()
         self.LavaTop.draw()
+    

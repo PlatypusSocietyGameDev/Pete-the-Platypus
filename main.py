@@ -129,11 +129,12 @@ while running:
     TestDirtBlock.draw()
 
     player.refresh()
+    player.draw()
 
     if not player.dead:
-        player.draw()
         player.placeBlock(eventKeys, pygame.mouse.get_pos(), mouseDown)
 
+        player.gravity()
         player.move(dt, {
             "W": keys[pygame.K_w],
             "A": keys[pygame.K_a],
@@ -142,6 +143,8 @@ while running:
         })
 
         lava.touchPlayer()
+    else:
+        player.deadStaging(dt)
 
     lava.draw(dt)
 

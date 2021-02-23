@@ -21,6 +21,7 @@ class New:
             UDim2.New(0, 100, 0, 100),
             Vector2.New(0.5, 0.5)
         )
+        self.Image.initialiseRotations(-90, 0)
 
         self.dead = False
 
@@ -61,6 +62,8 @@ class New:
         self.walls = []
         self.lastMousePos = (0, 0)
 
+        self.deadStage = 0
+
     def drawRadius(self):
         if self.placingBlocks:
             circle(self.windowScreen, (100, 255, 100), Vector2.ToPygame(self.Position, isVector=True).tuple, self.placeRangeRadius, 5)
@@ -100,6 +103,26 @@ class New:
 
     def draw(self):
         self.Image.draw()
+
+    def deadStaging(self, dt):
+        if self.deadStage <= 10:
+            self.gravity()
+            self.move(dt, {
+                "W": True,
+            }, jumpBypass=True)
+            self.deadStage += 1
+
+        else:
+            if self.jumping:
+                self.gravity()
+                self.move(dt, {})
+
+            angle = 0 - self.deadStage*3  # 1 angle per 3 frames
+            if angle < -90:
+                return
+
+            self.deadStage += 1
+            self.Image.setRotation(angle)
 
     def placeBlock(self, eventKeys: list, mousePosition: tuple, mouseDown):
         if K_q in eventKeys:
@@ -184,9 +207,7 @@ class New:
             self.Position = oldPos + Vector2.New(0, -self.gravitySpeed)
             self.gravitySpeed += self.gravityIncreasePF
 
-    def move(self, dt, moveDict: dict):
-        self.gravity()
-
+    def move(self, dt, moveDict: dict, jumpBypass=False):
         newSpeed = self.pixelsPerSecond * dt / 1000
 
         movements = {
@@ -201,7 +222,7 @@ class New:
 
         offset = Vector2.New(0, 0)
         for key, isPressed in moveDict.items():
-            if key == "W" and isPressed and not self.jumping:
+            if key == "W" and isPressed and not self.jumping or jumpBypass:
                 self.jumping = True
                 self.gravityIncreasePF = -2
                 continue
